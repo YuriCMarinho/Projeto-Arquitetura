@@ -16,7 +16,7 @@ def ula_6bits(A, B, instrucao_6bits):
     carry_in = 1 if inc else 0
     vai_um = 0
     
-    # Operações
+    # Operações 
     if f0 == 0 and f1 == 0:
         S = a_val & b_val
     elif f0 == 0 and f1 == 1:
