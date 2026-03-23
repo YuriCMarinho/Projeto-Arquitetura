@@ -1,3 +1,5 @@
+import os
+
 def to_bin32(valor):
     """Função auxiliar para formatar um número inteiro em uma string binária de 32 bits."""
     return f"{valor & 0xFFFFFFFF:032b}"
@@ -72,5 +74,5 @@ def rodar_etapa1(arquivo_instrucoes, arquivo_saida):
         out.write("> Line is empty, EOP.\n")
 
 if __name__ == "__main__":
-    # Certifique-se de que a primeira linha do seu programa_etapa1.txt seja 111100
-    rodar_etapa1('programa_etapa1.txt','log_etapa1.txt')
+    base = os.path.dirname(os.path.abspath(__file__))
+    rodar_etapa1(os.path.join(base, 'programa_etapa1.txt'), os.path.join(base, 'log_etapa1.txt'))

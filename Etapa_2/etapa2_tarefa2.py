@@ -110,6 +110,7 @@ class Mic1Datapath:
                 log.write("=====================================================\nNo more lines, EOP.\n")
 
 if __name__ == "__main__":
-    maquina = Mic1Datapath()
-    # Chama a execução passando os dois arquivos de texto necessários
-    maquina.executar('programa_etapa2_tarefa2.txt', 'registradores_etapa2_tarefa2.txt', 'log_etapa2_tarefa2.txt')
+    base = os.path.dirname(os.path.abspath(__file__))
+    Mic1Datapath().executar(os.path.join(base, 'programa_etapa2_tarefa2.txt'), 
+                             os.path.join(base, 'registradores_etapa2_tarefa2.txt'), 
+                             os.path.join(base, 'log_etapa2_tarefa2.txt'))

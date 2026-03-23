@@ -1,3 +1,5 @@
+import os
+
 def to_bin32(val):
     return f"{val & 0xFFFFFFFF:032b}"
 
@@ -37,15 +39,15 @@ def ula_8bits(A, B, ir):
     
     return a_val, b_val, S, Sd, n, z, vai_um, False
 
-def rodar_tarefa1():
+def rodar_tarefa1(caminho_entrada, caminho_saida):
     A = 0x00000001  # 1
     B = 0x80000000  # Bit mais significativo alto
     PC = 1
     
-    with open('log_etapa2_tarefa1.txt', 'w') as log:
+    with open(caminho_saida, 'w') as log:
         log.write(f"b = {to_bin32(B)}\na = {to_bin32(A)}\n\nStart of Program\n")
     
-        with open('programa_etapa2_tarefa1.txt', 'r') as arquivo:
+        with open(caminho_entrada, 'r') as arquivo:
             for linha in arquivo:
                 IR = linha.strip()
                 if not IR: continue
@@ -61,9 +63,10 @@ def rodar_tarefa1():
                     log.write(f"sd = {to_bin32(Sd)}\nn = {n}\nz = {z}\nco = {co}\n")
                 PC += 1
                 
-                log.write("============================================================\n")
-                log.write(f"Cycle {PC}\n\nPC = {PC}\n> Line is empty, EOP.\n") 
+            log.write("============================================================\n")
+            log.write(f"Cycle {PC}\n\nPC = {PC}\n> Line is empty, EOP.\n") 
 
 
 if __name__ == "__main__":
-    rodar_tarefa1()
+    base = os.path.dirname(os.path.abspath(__file__))
+    rodar_tarefa1(os.path.join(base, 'programa_etapa2_tarefa1.txt'), os.path.join(base, 'log_etapa2_tarefa1.txt'))
