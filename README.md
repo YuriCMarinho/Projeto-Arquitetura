@@ -33,7 +33,3 @@ python main.py
 ```
 
 Os logs de cada etapa são gerados na pasta `saidas/`.
-
-## 📚 Referência
-
-> **Andrew S. Tanenbaum** — *Organização Estruturada de Computadores*, 6ª edição.
