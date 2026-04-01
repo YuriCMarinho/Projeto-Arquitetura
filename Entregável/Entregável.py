@@ -78,9 +78,9 @@ def iload(x):
     mem[regs['mar']] = regs['mdr']
     regs['tos'] = regs['mdr']
 
-    b_bus = "lv, sp"
-    c_bus = "h, mar, sp, tos"
-    return b_bus, c_bus
+    bar_b = "lv, sp"
+    bar_c = "h, mar, sp, tos"
+    return bar_b, bar_c
 
 def dup():
     regs['sp']  += 1
@@ -88,9 +88,9 @@ def dup():
     regs['mdr']  = regs['tos']
     mem[regs['mar']] = regs['mdr']
 
-    b_bus = "sp, tos"
-    c_bus = "mar, sp, mdr"
-    return b_bus, c_bus
+    bar_b = "sp, tos"
+    bar_c = "mar, sp, mdr"
+    return bar_b, bar_c
 
 def bipush(byte_arg):
     regs['sp']  += 1
@@ -101,9 +101,9 @@ def bipush(byte_arg):
     regs['tos']  = regs['h']
     mem[regs['mar']] = regs['mdr']
 
-    b_bus = "sp"
-    c_bus = "h, tos, mdr, sp, mar"
-    return b_bus, c_bus
+    bar_b = "sp"
+    bar_c = "h, tos, mdr, sp, mar"
+    return bar_b, bar_c
 
 # -------------------------------------------------------
 # Execução
@@ -131,9 +131,9 @@ for numero_instrucao, instrucao in enumerate(instrucoes, start=1):
     mem_antes  = dict(mem)
 
     # Executa a instrução e captura os barramentos
-    if   comando == "ILOAD":  b_bus, c_bus = iload(int(partes[1]))
-    elif comando == "DUP":    b_bus, c_bus = dup()
-    elif comando == "BIPUSH": b_bus, c_bus = bipush(partes[1])
+    if   comando == "ILOAD":  bar_b, bar_c = iload(int(partes[1]))
+    elif comando == "DUP":    bar_b, bar_c = dup()
+    elif comando == "BIPUSH": bar_b, bar_c = bipush(partes[1])
     else:
         print(f"Instrução desconhecida: '{comando}'")
         continue
@@ -142,8 +142,8 @@ for numero_instrucao, instrucao in enumerate(instrucoes, start=1):
     print(f"instrucao = {instrucao}")
     print("==============================================")
     print(f"Instrução {numero_instrucao}")
-    print(f"b_bus = {b_bus}")
-    print(f"c_bus = {c_bus}")
+    print(f"bar_b = {bar_b}")
+    print(f"bar_c = {bar_c}")
     print()
     print("> Registradores antes da instrucao")
     for nome, valor in regs_antes.items():
