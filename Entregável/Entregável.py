@@ -1,5 +1,8 @@
 import os
 
+# Simulador Mic-1 — Arquitetura II
+# Suporta: ILOAD x, DUP, BIPUSH byte
+
 # -------------------------------------------------------
 # Estado da máquina
 # -------------------------------------------------------
