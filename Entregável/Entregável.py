@@ -1,8 +1,4 @@
-# Simulador Mic-1 — Arquitetura II
-# Suporta: ILOAD x, DUP, BIPUSH byte
-
-#Ordem: Valores nas linhas da memoria ant -> registradores -> bar B -> bar C -> Valores na memoria Pos 
-
+import os
 
 # -------------------------------------------------------
 # Estado da máquina
@@ -23,45 +19,23 @@ regs = {
 mem = {}
 
 # -------------------------------------------------------
-# Carrega os arquivos de entrada
-# -------------------------------------------------------
-
-with open("dados_etapa3_tarefa1.txt") as f:
-    for endereco, linha in enumerate(f):
-        if linha.strip():
-            mem[endereco] = int(linha.strip(), 2)
-
-try:
-    with open("registradores_etapa3_tarefa1.txt") as f:
-        for linha in f:
-            if '=' not in linha:
-                continue
-            nome, valor = linha.strip().split('=')
-            nome  = nome.strip().lower()
-            valor = valor.strip()
-            if nome in regs:
-                regs[nome] = int(valor, 2)
-except FileNotFoundError:
-    print("Aviso: arquivo de registradores não encontrado. Usando valores padrão.\n")
-
-# -------------------------------------------------------
-# Funções de formatação
+# Funções de formatação (agora recebem o arquivo 'out')
 # -------------------------------------------------------
 
 def para_bin(valor, bits=32):
     """Converte inteiro para string binária com o número de bits correto."""
     return format(valor, f'0{bits}b')
 
-def imprimir_regs():
+def imprimir_regs(out):
     for nome, valor in regs.items():
         bits = 8 if nome == 'mbr' else 32
-        print(f"{nome} = {para_bin(valor, bits)}")
+        out.write(f"{nome} = {para_bin(valor, bits)}\n")
 
-def imprimir_mem():
-    print("*******************************")
+def imprimir_mem(out):
+    out.write("*******************************\n")
     for endereco in range(len(mem)):
-        print(para_bin(mem[endereco]))
-    print("*******************************")
+        out.write(f"{para_bin(mem[endereco])}\n")
+    out.write("*******************************\n")
 
 # -------------------------------------------------------
 # Instruções IJVM 
@@ -106,52 +80,99 @@ def bipush(byte_arg):
     return bar_b, bar_c
 
 # -------------------------------------------------------
-# Execução
+# Execução Principal (inspirada na Etapa 1)
 # -------------------------------------------------------
 
-print("==============================================")
-print("> Estado da memoria inicial")
-imprimir_mem()
-print("> Estado dos registradores iniciais")
-imprimir_regs()
+def rodar_etapa3(arq_dados, arq_regs, arq_instrucoes, arq_saida):
+    
+    # 1. Carrega a Memória
+    if os.path.exists(arq_dados):
+        with open(arq_dados, 'r') as f:
+            for endereco, linha in enumerate(f):
+                if linha.strip():
+                    mem[endereco] = int(linha.strip(), 2)
+    
+    # 2. Carrega os Registradores
+    try:
+        with open(arq_regs, 'r') as f:
+            for linha in f:
+                if '=' not in linha:
+                    continue
+                nome, valor = linha.strip().split('=')
+                nome  = nome.strip().lower()
+                valor = valor.strip()
+                if nome in regs:
+                    regs[nome] = int(valor, 2)
+    except FileNotFoundError:
+        print("Aviso: arquivo de registradores não encontrado. Usando valores padrão.\n")
 
-with open("instruções.txt", encoding="utf-8") as f:
-    instrucoes = [linha.strip() for linha in f if linha.strip()]
+    # 3. Abre o arquivo de LOG para escrita
+    with open(arq_saida, 'w', encoding='utf-8') as out:
+        
+        out.write("==============================================\n")
+        out.write("> Estado da memoria inicial\n")
+        imprimir_mem(out)
+        out.write("> Estado dos registradores iniciais\n")
+        imprimir_regs(out)
 
-print()
-print("==============================================")
-print("Comecando!")
+        # 4. Lê as instruções
+        if not os.path.exists(arq_instrucoes):
+            out.write("\nErro: Arquivo de instruções não encontrado.\n")
+            return
 
-for numero_instrucao, instrucao in enumerate(instrucoes, start=1):
-    partes  = instrucao.split()
-    comando = partes[0].upper()
+        with open(arq_instrucoes, 'r', encoding='utf-8') as f:
+            instrucoes = [linha.strip() for linha in f if linha.strip()]
 
-    # Salva estado antes de executar
-    regs_antes = dict(regs)
-    mem_antes  = dict(mem)
+        out.write("\n==============================================\n")
+        out.write("Comecando!\n")
 
-    # Executa a instrução e captura os barramentos
-    if   comando == "ILOAD":  bar_b, bar_c = iload(int(partes[1]))
-    elif comando == "DUP":    bar_b, bar_c = dup()
-    elif comando == "BIPUSH": bar_b, bar_c = bipush(partes[1])
-    else:
-        print(f"Instrução desconhecida: '{comando}'")
-        continue
+        # 5. Executa as instruções e grava no log
+        for numero_instrucao, instrucao in enumerate(instrucoes, start=1):
+            partes  = instrucao.split()
+            comando = partes[0].upper()
 
-    # Exibe o log no formato esperado
-    print(f"instrucao = {instrucao}")
-    print("==============================================")
-    print(f"Instrução {numero_instrucao}")
-    print(f"bar_b = {bar_b}")
-    print(f"bar_c = {bar_c}")
-    print()
-    print("> Registradores antes da instrucao")
-    for nome, valor in regs_antes.items():
-        bits = 8 if nome == 'mbr' else 32
-        print(f"{nome} = {para_bin(valor, bits)}")
-    print()
-    print("> Registradores depois da instrucao")
-    imprimir_regs()
-    print()
-    print("> Memoria depois da instrucao")
-    imprimir_mem()
+            # Salva estado antes de executar
+            regs_antes = dict(regs)
+
+            # Executa a instrução e captura os barramentos
+            if   comando == "ILOAD":  bar_b, bar_c = iload(int(partes[1]))
+            elif comando == "DUP":    bar_b, bar_c = dup()
+            elif comando == "BIPUSH": bar_b, bar_c = bipush(partes[1])
+            else:
+                out.write(f"Instrução desconhecida: '{comando}'\n")
+                continue
+
+            # Escreve o log no formato esperado usando out.write()
+            out.write(f"instrucao = {instrucao}\n")
+            out.write("==============================================\n")
+            out.write(f"Instrução {numero_instrucao}\n")
+            out.write(f"bar_b = {bar_b}\n")
+            out.write(f"bar_c = {bar_c}\n\n")
+            
+            out.write("> Registradores antes da instrucao\n")
+            for nome, valor in regs_antes.items():
+                bits = 8 if nome == 'mbr' else 32
+                out.write(f"{nome} = {para_bin(valor, bits)}\n")
+            out.write("\n")
+            
+            out.write("> Registradores depois da instrucao\n")
+            imprimir_regs(out)
+            out.write("\n")
+            
+            out.write("> Memoria depois da instrucao\n")
+            imprimir_mem(out)
+            out.write("\n")
+
+    print(f"Simulação concluída com sucesso! Verifique o arquivo: {os.path.basename(arq_saida)}")
+
+
+if __name__ == "__main__":
+    # Organiza os caminhos usando os.path de forma idêntica à sua referência
+    base = os.path.dirname(os.path.abspath(__file__))
+    
+    arquivo_dados = os.path.join(base, 'dados_etapa3_tarefa1.txt')
+    arquivo_regs = os.path.join(base, 'registradores_etapa3_tarefa1.txt')
+    arquivo_instrucoes = os.path.join(base, 'instruções.txt')
+    arquivo_log = os.path.join(base, 'log_entregavel.txt')
+    
+    rodar_etapa3(arquivo_dados, arquivo_regs, arquivo_instrucoes, arquivo_log)
