@@ -8,21 +8,21 @@ import os
 # -------------------------------------------------------
 
 regs = {
-    'mar': 0,
-    'mdr': 0,
-    'pc' : 0,
-    'mbr': 0,
-    'sp' : 0,
-    'lv' : 0,
-    'cpp': 0,
-    'tos': 0,
-    'opc': 0,
-    'h'  : 0,
+    'mar': 0, # mem address register
+    'mdr': 0, # mem data register
+    'pc' : 0, # program counter
+    'mbr': 0, # mem buffer register
+    'sp' : 0, # stack pointer (pro topo)
+    'lv' : 0, # local variable
+    'cpp': 0, # constant pool pointer
+    'tos': 0, # top of stack (valor do topo)
+    'opc': 0, # opcode temporario
+    'h'  : 0, # registrador aux da ULA
 }
 mem = {}
 
 # -------------------------------------------------------
-# Funções de formatação (agora recebem o arquivo 'out')
+# Funções de formatação
 # -------------------------------------------------------
 
 def para_bin(valor, bits=32):
@@ -31,7 +31,7 @@ def para_bin(valor, bits=32):
 
 def imprimir_regs(out):
     for nome, valor in regs.items():
-        bits = 8 if nome == 'mbr' else 32
+        bits = 8 if nome == 'mbr' else 32 #só o mbr tem 8 bits o resto todo tem 32
         out.write(f"{nome} = {para_bin(valor, bits)}\n")
 
 def imprimir_mem(out):
@@ -44,22 +44,22 @@ def imprimir_mem(out):
 # Instruções IJVM 
 # -------------------------------------------------------
 
-def iload(x):
+def iload(x): #Carrega variável local na pilha
     regs['h'] = regs['lv']
-    for _ in range(x):
+    for _ in range(x): #+1 x vezes
         regs['h'] += 1
     regs['mar'] = regs['h']
-    regs['mdr'] = mem.get(regs['h'], 0)
+    regs['mdr'] = mem.get(regs['h'], 0) # recebe o valor do endereço da memoria
     regs['sp']  += 1
     regs['mar']  = regs['sp']
-    mem[regs['mar']] = regs['mdr']
+    mem[regs['mar']] = regs['mdr']#empilha o valor(ver na memoria depois)
     regs['tos'] = regs['mdr']
 
     bar_b = "lv, sp"
     bar_c = "h, mar, sp, tos"
     return bar_b, bar_c
 
-def dup():
+def dup(): # Duplica o topo da pilha
     regs['sp']  += 1
     regs['mar']  = regs['sp']
     regs['mdr']  = regs['tos']
@@ -69,21 +69,21 @@ def dup():
     bar_c = "mar, sp, mdr"
     return bar_b, bar_c
 
-def bipush(byte_arg):
+def bipush(byte_arg): #Empilha uma constante de 1 byte
     regs['sp']  += 1
     regs['mar']  = regs['sp']
-    regs['mbr']  = int(byte_arg, 2)
+    regs['mbr']  = int(byte_arg, 2) #recebe o valor do byte
     regs['h']    = regs['mbr']
     regs['mdr']  = regs['h']
     regs['tos']  = regs['h']
-    mem[regs['mar']] = regs['mdr']
+    mem[regs['mar']] = regs['mdr'] #wr
 
     bar_b = "sp"
     bar_c = "h, tos, mdr, sp, mar"
     return bar_b, bar_c
 
 # -------------------------------------------------------
-# Execução Principal (inspirada na Etapa 1)
+# Execução Principal
 # -------------------------------------------------------
 
 def rodar_etapa3(arq_dados, arq_regs, arq_instrucoes, arq_saida):
