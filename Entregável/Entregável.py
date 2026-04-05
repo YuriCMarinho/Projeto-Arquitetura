@@ -145,7 +145,7 @@ def rodar_etapa3(arq_dados, arq_regs, arq_instrucoes, arq_saida):
                 out.write(f"Instrução desconhecida: '{comando}'\n")
                 continue
 
-            # Escreve o log no formato esperado usando out.write()
+            # Escreve o log usando out.write()
             out.write(f"instrucao = {instrucao}\n")
             out.write("==============================================\n")
             out.write(f"Instrução {numero_instrucao}\n")
@@ -170,7 +170,6 @@ def rodar_etapa3(arq_dados, arq_regs, arq_instrucoes, arq_saida):
 
 
 if __name__ == "__main__":
-    # Organiza os caminhos usando os.path de forma idêntica à sua referência
     base = os.path.dirname(os.path.abspath(__file__))
     
     arquivo_dados = os.path.join(base, 'dados_etapa3_tarefa1.txt')
